@@ -19,9 +19,10 @@ class _FavoritePageState extends State<FavoritePage> {
     _loadFavorites();
   }
 
-  void _loadFavorites() {
+  void _loadFavorites() async {
+    final favorites = await FavoriteHelper.getAllFavorites();
     setState(() {
-      _favorites = FavoriteHelper.getAllFavorites();
+      _favorites = favorites;
     });
   }
 
@@ -31,8 +32,14 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   void _handleDelete(BuildContext context, int id, String name) async {
+    print("Menghapus id $id...");
     await FavoriteHelper.removeFavorite(id);
-    _loadFavorites();
+    print("Mengambil ulang data...");
+    final favorites = await FavoriteHelper.getAllFavorites();
+    print("Data setelah hapus: ${favorites.map((r) => r.name).toList()}");
+    setState(() {
+      _favorites = favorites;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Resep "$name" dihapus dari favorit.'),
@@ -40,6 +47,8 @@ class _FavoritePageState extends State<FavoritePage> {
       ),
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {

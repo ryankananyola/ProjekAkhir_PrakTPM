@@ -14,8 +14,8 @@ class FavoriteHelper {
     await box.delete(id);
   }
 
-  static List<Recipe> getAllFavorites() {
-    final box = Hive.box<Recipe>(boxName);
+  static Future<List<Recipe>> getAllFavorites() async {
+    final box = await Hive.openBox<Recipe>(boxName);
     return box.values.toList();
   }
 
