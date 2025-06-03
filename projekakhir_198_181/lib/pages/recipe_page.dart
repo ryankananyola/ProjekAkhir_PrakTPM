@@ -41,21 +41,27 @@ class _RecipePageState extends State<RecipePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        centerTitle: true,
         title: const Text(
           'Resep',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontSize: 22,
+          ),
         ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite),
-            tooltip: 'Favorit',
+            icon: const Icon(Icons.favorite_border),
             onPressed: () {
               Navigator.pushNamed(context, '/favorites');
             },
-          ),
+          )
         ],
       ),
       body: FutureBuilder<List<Recipe>>(
@@ -72,13 +78,17 @@ class _RecipePageState extends State<RecipePage> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Cari resep atau cuisine...',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
                     ),
                   ),
                   onChanged: _filterRecipes,
@@ -88,11 +98,15 @@ class _RecipePageState extends State<RecipePage> {
                 child: _filteredRecipes.isEmpty
                     ? const Center(child: Text('Tidak ada hasil ditemukan.'))
                     : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _filteredRecipes.length,
                         itemBuilder: (context, index) {
-                          return RecipeCard(
-                            recipe: _filteredRecipes[index],
-                            showRating: true,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: RecipeCard(
+                              recipe: _filteredRecipes[index],
+                              showRating: true,
+                            ),
                           );
                         },
                       ),

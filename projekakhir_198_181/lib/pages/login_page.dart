@@ -74,112 +74,142 @@ class _LoginPageState extends State<LoginPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8), 
+      backgroundColor: const Color(0xFFF4F6F8),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              children: [
+                const Text(
+                  'ResepKU',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 101, 126, 255),
+                    letterSpacing: 1.2,
                   ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      hintText: 'Username',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 15,
+                        offset: const Offset(0, 6),
                       ),
-                    ),
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Username wajib diisi' : null,
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Password wajib diisi' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  if (_errorMessage != null)
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 131, 176, 255),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 14, 
-                                fontWeight: FontWeight.bold, 
-                                color: Colors.black87, 
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            hintText: 'Username',
+                            prefixIcon: const Icon(Icons.person_outline),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Username wajib diisi' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            hintText: 'Password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Password wajib diisi' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        if (_errorMessage != null)
+                          Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: Colors.redAccent),
+                          ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 131, 176, 255),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/register');
+                          },
+                          child: const Text(
+                            'Belum punya akun? Daftar',
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
-                    child: const Text(
-                      'Belum punya akun? Daftar',
-                      style: TextStyle(color: Colors.blueAccent),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+
 }

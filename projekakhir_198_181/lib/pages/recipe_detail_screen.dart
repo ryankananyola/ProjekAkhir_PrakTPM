@@ -44,18 +44,34 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> with SingleTick
       rating: detail.rating,
     );
 
+    String message;
+
     if (isFavorite) {
-      final existingKey = box.keys.firstWhere((key) => box.get(key)!.id == recipe.id, orElse: () => null);
+      final existingKey = box.keys.firstWhere(
+        (key) => box.get(key)!.id == recipe.id,
+        orElse: () => null,
+      );
       if (existingKey != null) {
         box.delete(existingKey);
       }
+      message = 'Dihapus dari favorit';
     } else {
       box.add(recipe);
+      message = 'Ditambahkan ke favorit';
     }
 
     setState(() {
       isFavorite = !isFavorite;
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   @override

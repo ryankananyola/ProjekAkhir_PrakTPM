@@ -30,6 +30,17 @@ class _FavoritePageState extends State<FavoritePage> {
     _loadFavorites();
   }
 
+  void _handleDelete(BuildContext context, int id, String name) async {
+    await FavoriteHelper.removeFavorite(id);
+    _loadFavorites();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Resep "$name" dihapus dari favorit.'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,17 +56,10 @@ class _FavoritePageState extends State<FavoritePage> {
               itemCount: _favorites.length,
               itemBuilder: (context, index) {
                 final recipe = _favorites[index];
-                return Dismissible(
-                  key: Key(recipe.id.toString()),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    color: Colors.red,
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  onDismissed: (_) => _removeFavorite(recipe.id),
-                  child: RecipeCard(recipe: recipe, showRating: true),
+                return RecipeCard(
+                  recipe: recipe,
+                  showRating: true,
+                  onDelete: () => _handleDelete(context, recipe.id, recipe.name),
                 );
               },
             ),
