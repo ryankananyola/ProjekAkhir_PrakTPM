@@ -11,6 +11,7 @@ import 'pages/about_page.dart';
 import 'pages/recipe_page.dart';
 import 'pages/favorite_page.dart';
 import 'pages/splash_page.dart';
+import 'models/feedback_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,8 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(RecipeAdapter());
   await Hive.openBox<Recipe>('favorites');
+  Hive.registerAdapter(FeedbackModelAdapter());
+  await Hive.openBox<FeedbackModel>('feedbacks');
 
   runApp(const MyApp());
 }

@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:projekakhir_198_181/models/recipe_model.dart';
 import 'package:projekakhir_198_181/models/recipe_detail_model.dart';
 import 'package:projekakhir_198_181/services/recipe_service.dart';
+import 'feedback_page.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final int recipeId;
@@ -207,6 +208,32 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> with SingleTick
             spacing: 8,
             runSpacing: 4,
             children: recipe.tags.map((tag) => Chip(label: Text(tag))).toList(),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {
+              final simpleRecipe = Recipe(
+                id: recipe.id,
+                name: recipe.name,
+                image: recipe.image,
+                cuisine: recipe.cuisine,
+                rating: recipe.rating,
+              );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FeedbackPage(recipe: simpleRecipe),
+                ),
+              );
+            },
+            icon: const Icon(Icons.feedback),
+            label: const Text('Kirim Saran'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
           ),
         ],
       ),
