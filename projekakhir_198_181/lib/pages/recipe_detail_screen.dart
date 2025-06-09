@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:projekakhir_198_181/models/recipe_model.dart';
 import 'package:projekakhir_198_181/models/recipe_detail_model.dart';
 import 'package:projekakhir_198_181/services/recipe_service.dart';
 import 'feedback_page.dart';
+import '../models/feedback_model.dart';
+import 'buy_recipe_page.dart';
+import 'package:intl/intl.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final int recipeId;
@@ -173,7 +177,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> with SingleTick
   }
 
   Widget _buildInfoTab(RecipeServiceDetail recipe) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,22 +216,27 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> with SingleTick
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () {
-              final simpleRecipe = Recipe(
-                id: recipe.id,
-                name: recipe.name,
-                image: recipe.image,
-                cuisine: recipe.cuisine,
-                rating: recipe.rating,
-              );
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FeedbackPage(recipe: simpleRecipe),
+                  builder: (context) => FeedbackPage(
+                    recipeId: recipe.id,
+                    recipeImage: recipe.image,
+                    recipeTitle: recipe.name,
+                    recipeCity: recipe.cuisine,
+                    onSubmit: (feedback) {
+                      final box = Hive.box<FeedbackModel>('feedbacks');
+                      box.add(feedback);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Feedback terkirim!')),
+                      );
+                    },
+                  ),
                 ),
               );
             },
             icon: const Icon(Icons.feedback),
-            label: const Text('Kirim Saran'),
+            label: const Text('Kirim Catatan'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blueAccent,
               foregroundColor: Colors.white,
@@ -235,8 +244,155 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> with SingleTick
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BuyRecipePage(recipe: recipe),
+                ),
+              );
+            },
+            icon: const Icon(Icons.shopping_cart),
+            label: const Text('Beli Resep'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Daftar Catatan',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          _buildFeedbackList(recipe.id),
         ],
       ),
+    );
+  }
+
+  int getTimezoneOffset(String timezone) {
+    switch (timezone) {
+      case 'WITA':
+        return 8;
+      case 'WIT':
+        return 9;
+      case 'London':
+        return 1;
+      case 'WIB':
+      default:
+        return 7;
+    }
+  }
+
+  
+  Widget _buildFeedbackList(int recipeId) {
+    final box = Hive.box<FeedbackModel>('feedbacks');
+
+    return ValueListenableBuilder<Box<FeedbackModel>>(
+      valueListenable: box.listenable(),
+      builder: (context, box, _) {
+        final feedbackList = box.values
+            .where((f) => f.recipeId == recipeId)
+            .toList()
+          ..sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
+
+        if (feedbackList.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 16),
+            child: Text('Belum ada catatan.'),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: feedbackList.map((f) {
+            final offset = getTimezoneOffset(f.timezone);
+            final convertedTime = f.submittedAt.toUtc().add(Duration(hours: offset));
+            final formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(convertedTime);
+            final timeStr = '$formattedTime (${f.timezone})';
+
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: ListTile(
+                title: Text(f.comment),
+                subtitle: Text(timeStr),
+                leading: const Icon(Icons.notes),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.orange),
+                      onPressed: () async {
+                        final controller = TextEditingController(text: f.comment);
+                        final newComment = await showDialog<String>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Edit Catatan"),
+                            content: TextField(
+                              controller: controller,
+                              maxLines: 5,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Edit catatan...',
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Batal'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, controller.text.trim()),
+                                child: const Text('Simpan'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (newComment != null && newComment.isNotEmpty) {
+                          f.comment = newComment;
+                          await f.save();
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Hapus Catatan'),
+                            content: const Text('Apakah Anda yakin ingin menghapus catatan ini?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Batal'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Hapus'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          await f.delete();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 

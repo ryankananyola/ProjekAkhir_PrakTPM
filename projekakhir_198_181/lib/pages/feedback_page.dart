@@ -1,112 +1,166 @@
 import 'package:flutter/material.dart';
-import '../models/recipe_model.dart';
-import '../models/feedback_model.dart';
-import '../utils/feedback_helper.dart';
+import 'package:intl/intl.dart';
+import '../../models/feedback_model.dart';
+import 'package:hive/hive.dart';
 
 class FeedbackPage extends StatefulWidget {
-  final Recipe recipe;
-  const FeedbackPage({super.key, required this.recipe});
+  final Function(FeedbackModel) onSubmit;
+  final int recipeId;
+  final String recipeImage;
+  final String recipeTitle;
+  final String recipeCity;
+
+  FeedbackPage({
+    required this.onSubmit,
+    required this.recipeId,
+    required this.recipeImage,
+    required this.recipeTitle,
+    required this.recipeCity,
+  });
 
   @override
-  State<FeedbackPage> createState() => _FeedbackPageState();
+  _FeedbackPageState createState() => _FeedbackPageState();
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
-  final TextEditingController _controller = TextEditingController();
-  List<FeedbackModel> _feedbackList = [];
-  int? _editingIndex;
+  final _formKey = GlobalKey<FormState>();
+  final _controller = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadFeedback();
-  }
+  String selectedTimezone = "WIB";
+  final timezones = ["WIB", "WITA", "WIT", "London"];
 
-  Future<void> _loadFeedback() async {
-    final feedbacks = await FeedbackHelper.getFeedbacksByRecipe(widget.recipe.id);
-    setState(() {
-      _feedbackList = feedbacks;
-    });
-  }
-
-  Future<void> _submitFeedback() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-
-    if (_editingIndex == null) {
-      await FeedbackHelper.addFeedback(
-        FeedbackModel(recipeId: widget.recipe.id, comment: text),
-      );
-    } else {
-      final updated = FeedbackModel(recipeId: widget.recipe.id, comment: text);
-      await FeedbackHelper.updateFeedback(_editingIndex!, updated);
-      _editingIndex = null;
+  // Helper untuk mendapatkan offset zona waktu dalam jam dari UTC
+  int getTimezoneOffset(String timezone) {
+    switch (timezone) {
+      case 'WITA':
+        return 8;
+      case 'WIT':
+        return 9;
+      case 'London':
+        return 1; // GMT+1 saat DST (misal Juni)
+      case 'WIB':
+      default:
+        return 7;
     }
-
-    _controller.clear();
-    _loadFeedback();
   }
 
-  void _startEdit(int index) {
-    setState(() {
-      _editingIndex = index;
-      _controller.text = _feedbackList[index].comment;
-    });
+  // Format waktu yang sudah dikonversi
+  String getConvertedTime(String timezone) {
+    final offset = getTimezoneOffset(timezone);
+    final converted = DateTime.now().toUtc().add(Duration(hours: offset));
+    return DateFormat('yyyy-MM-dd – HH:mm').format(converted);
   }
 
-  Future<void> _deleteFeedback(int index) async {
-    await FeedbackHelper.deleteFeedback(index);
-    _loadFeedback();
+  void _submitFeedback() async {
+    if (_formKey.currentState!.validate()) {
+      final offset = getTimezoneOffset(selectedTimezone);
+      final feedback = FeedbackModel(
+        recipeId: widget.recipeId,
+        comment: _controller.text.trim(),
+        submittedAt: DateTime.now(),
+        timezone: selectedTimezone,
+      );
+
+      final box = await Hive.openBox<FeedbackModel>('feedbacks');
+      await box.add(feedback);
+
+      widget.onSubmit(feedback);
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    String convertedTime = getConvertedTime(selectedTimezone);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Saran untuk ${widget.recipe.name}')),
+      appBar: AppBar(
+        title: Text('Kirim Catatan'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(children: [
-              Image.network(widget.recipe.image, width: 60, height: 60, fit: BoxFit.cover),
-              const SizedBox(width: 12),
-              Expanded(child: Text(widget.recipe.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-            ]),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                labelText: _editingIndex == null ? 'Tulis saran atau masukan...' : 'Edit saran',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: _submitFeedback,
-                ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      widget.recipeImage,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.recipeTitle,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          widget.recipeCity,
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text('Daftar Saran/Masukan:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _feedbackList.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_feedbackList[index].comment),
-                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                      IconButton(
-                        icon: Icon(Icons.edit, color: Colors.orange),
-                        onPressed: () => _startEdit(index),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteFeedback(index),
-                      ),
-                    ]),
+              SizedBox(height: 16),
+              Text(
+                "Zona Waktu",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<String>(
+                value: selectedTimezone,
+                onChanged: (value) {
+                  setState(() {
+                    selectedTimezone = value!;
+                  });
+                },
+                items: timezones.map((String tz) {
+                  return DropdownMenuItem<String>(
+                    value: tz,
+                    child: Text(tz),
                   );
+                }).toList(),
+              ),
+              SizedBox(height: 8),
+              Text("Waktu Kirim: $convertedTime ($selectedTimezone)"),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _controller,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  labelText: 'Tulis catatan Anda...',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Catatan tidak boleh kosong';
+                  }
+                  return null;
                 },
               ),
-            ),
-          ],
+              SizedBox(height: 16),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _submitFeedback,
+                  child: Text('Kirim'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

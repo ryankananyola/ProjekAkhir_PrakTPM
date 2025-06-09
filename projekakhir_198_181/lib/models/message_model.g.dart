@@ -1,41 +1,35 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'feedback_model.dart';
+part of 'message_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class FeedbackModelAdapter extends TypeAdapter<FeedbackModel> {
+class MessageAdapter extends TypeAdapter<Message> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
-  FeedbackModel read(BinaryReader reader) {
+  Message read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return FeedbackModel(
-      recipeId: fields[0] as int,
-      comment: fields[1] as String,
-      submittedAt: fields[2] as DateTime,
-      timezone: fields[3] as String,
+    return Message(
+      kesan: fields[0] as String,
+      pesan: fields[1] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, FeedbackModel obj) {
+  void write(BinaryWriter writer, Message obj) {
     writer
-      ..writeByte(4)
-      ..writeByte(0)
-      ..write(obj.recipeId)
-      ..writeByte(1)
-      ..write(obj.comment)
       ..writeByte(2)
-      ..write(obj.submittedAt)
-      ..writeByte(3)
-      ..write(obj.timezone);
+      ..writeByte(0)
+      ..write(obj.kesan)
+      ..writeByte(1)
+      ..write(obj.pesan);
   }
 
   @override
@@ -44,7 +38,7 @@ class FeedbackModelAdapter extends TypeAdapter<FeedbackModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FeedbackModelAdapter &&
+      other is MessageAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

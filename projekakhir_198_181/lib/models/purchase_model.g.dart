@@ -1,41 +1,41 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'feedback_model.dart';
+part of 'purchase_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class FeedbackModelAdapter extends TypeAdapter<FeedbackModel> {
+class PurchasedRecipeAdapter extends TypeAdapter<PurchasedRecipe> {
   @override
-  final int typeId = 1;
+  final int typeId = 3;
 
   @override
-  FeedbackModel read(BinaryReader reader) {
+  PurchasedRecipe read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return FeedbackModel(
-      recipeId: fields[0] as int,
-      comment: fields[1] as String,
-      submittedAt: fields[2] as DateTime,
-      timezone: fields[3] as String,
+    return PurchasedRecipe(
+      recipe: fields[0] as Recipe,
+      purchasePrice: fields[1] as double,
+      location: fields[2] as String?,
+      purchasedAt: fields[3] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, FeedbackModel obj) {
+  void write(BinaryWriter writer, PurchasedRecipe obj) {
     writer
       ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.recipeId)
+      ..write(obj.recipe)
       ..writeByte(1)
-      ..write(obj.comment)
+      ..write(obj.purchasePrice)
       ..writeByte(2)
-      ..write(obj.submittedAt)
+      ..write(obj.location)
       ..writeByte(3)
-      ..write(obj.timezone);
+      ..write(obj.purchasedAt);
   }
 
   @override
@@ -44,7 +44,7 @@ class FeedbackModelAdapter extends TypeAdapter<FeedbackModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FeedbackModelAdapter &&
+      other is PurchasedRecipeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -45,10 +45,15 @@ class _RecipePageState extends State<RecipePage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        leading: IconButton(
+          icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black87),
+          onPressed: () {
+            Navigator.pushNamed(context, '/purchases'); // Route halaman resep yang dibeli
+          },
+        ),
         centerTitle: true,
         title: const Text(
-          'Resep',
+          'ResepKU',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black87,

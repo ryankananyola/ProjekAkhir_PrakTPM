@@ -10,5 +10,16 @@ class FeedbackModel extends HiveObject {
   @HiveField(1)
   String comment;
 
-  FeedbackModel({required this.recipeId, required this.comment});
+  @HiveField(2)
+  DateTime submittedAt; // waktu pengiriman
+
+  @HiveField(3)
+  String timezone; // zona waktu (WIB, WITA, WIT, London)
+
+  FeedbackModel({
+    required this.recipeId,
+    required this.comment,
+    required this.submittedAt,
+    required this.timezone,
+  });
 }

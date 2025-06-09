@@ -6,12 +6,14 @@ import 'models/recipe_model.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/home_page.dart';
-import 'pages/help_page.dart';
-import 'pages/about_page.dart';
+import 'pages/kesanpesan_page.dart';
+import 'pages/profile_page.dart';
 import 'pages/recipe_page.dart';
 import 'pages/favorite_page.dart';
-import 'pages/splash_page.dart';
 import 'models/feedback_model.dart';
+import 'models/message_model.dart';
+import 'pages/purchase_recipe_page.dart';
+import 'models/purchase_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +24,10 @@ void main() async {
   await Hive.openBox<Recipe>('favorites');
   Hive.registerAdapter(FeedbackModelAdapter());
   await Hive.openBox<FeedbackModel>('feedbacks');
+  Hive.registerAdapter(MessageAdapter());
+  await Hive.openBox<Message>('messagesBox');
+  Hive.registerAdapter(PurchasedRecipeAdapter());
+  await Hive.openBox<PurchasedRecipe>('purchases');
 
   runApp(const MyApp());
 }
@@ -44,14 +50,14 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: const Color.fromARGB(255, 219, 243, 255),
       ),
       routes: {
-        '/splash' : (context) => const SplashPage(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const HomePage(),
         '/recipes': (context) => const RecipePage(),
-        '/help': (context) => const HelpPage(),
-        '/about': (context) => const AboutPage(),
+        '/kesanpesan': (context) => const KesanPesanPage(),
+        '/profile': (context) => const ProfilePage(),
         '/favorites': (context) => const FavoritePage(),
+        '/purchases': (context) => const PurchasedRecipesPage()
       },
       home: FutureBuilder<bool>(
         future: checkLoginStatus(),
